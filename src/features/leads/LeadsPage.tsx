@@ -55,7 +55,6 @@ const LeadsPage: React.FC = () => {
     setSortConfig({ key, direction });
   };
 
-  // Function to handle lead selection for editing
   const handleSelectLead = (lead: Lead) => {
     setSelectedLead(lead);
   };
@@ -70,57 +69,55 @@ const LeadsPage: React.FC = () => {
       {/* Header Toolbar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Leads</h1>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Leads <span className="text-primary/50 text-sm font-bold ml-1">{leads.length}</span></h1>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-          <div className="relative flex-grow sm:flex-grow-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <div className="relative flex-grow sm:flex-grow-0 group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors" />
             <input
               type="text"
-              placeholder="Search leads..."
+              placeholder="Find leads..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-3 py-2 w-full sm:w-64 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="pl-9 pr-3 py-2.5 w-full sm:w-64 bg-white border border-gray-100 rounded-xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all placeholder:text-gray-300"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex bg-gray-100 p-1 rounded-lg">
-              <button
-                onClick={() => setView('pipeline')}
-                className={`p-1.5 rounded-md transition-all ${view === 'pipeline' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                title="Kanban View"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setView('table')}
-                className={`p-1.5 rounded-md transition-all ${view === 'table' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                title="List View"
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-
-            <Button
-              variant="primary"
-              size="md"
-              icon={Plus}
-              onClick={openCreateLeadModal}
-              className="bg-primary hover:bg-primary-dark text-white shadow-sm"
+          <div className="flex items-center gap-2 p-1 bg-gray-50 rounded-xl border border-gray-100">
+            <button
+              onClick={() => setView('pipeline')}
+              className={`p-2 rounded-lg transition-all flex items-center gap-1.5 ${view === 'pipeline' ? 'bg-white shadow-sm text-gray-900 border border-gray-100' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              Add Lead
-            </Button>
+              <LayoutGrid className="w-4 h-4" />
+              <span className="text-[11px] font-black uppercase tracking-wider">Pipeline</span>
+            </button>
+            <button
+              onClick={() => setView('table')}
+              className={`p-2 rounded-lg transition-all flex items-center gap-1.5 ${view === 'table' ? 'bg-white shadow-sm text-gray-900 border border-gray-100' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <List className="w-4 h-4" />
+              <span className="text-[11px] font-black uppercase tracking-wider">List</span>
+            </button>
           </div>
+
+          <Button
+            variant="primary"
+            size="md"
+            icon={Plus}
+            onClick={openCreateLeadModal}
+            className="bg-gray-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-gray-200"
+          >
+            Add Lead
+          </Button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-[600px]">
         {view === 'pipeline' ? (
           <NewLeadProvider value={newLeadContextValue}>
             <LeadsPipelineView leads={filteredLeads} onSelectLead={handleSelectLead} />
           </NewLeadProvider>
         ) : (
-          <div className="bg-white p-4 rounded-lg shadow-sm h-full overflow-y-auto border border-gray-200">
+          <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/80 h-full overflow-hidden">
             <LeadsTable leads={sortedLeads} requestSort={requestSort} sortConfig={sortConfig} />
           </div>
         )}

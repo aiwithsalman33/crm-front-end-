@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MoreHorizontal, GripVertical, DollarSign, Edit, Eye, Trash2, Plus } from 'lucide-react';
+import { MoreHorizontal, GripVertical, DollarSign, Edit, Eye, Trash2, Plus, ChevronRight } from 'lucide-react';
 import type { Deal, DealStage } from '../../types';
 import { useDeals } from '../../contexts/DealsContext';
 import { useUsers } from '../../contexts/UsersContext';
@@ -38,13 +38,16 @@ const DealCard: React.FC<{ deal: Deal; onSelectDeal: (deal: Deal) => void }> = (
     <div
       draggable
       onDragStart={handleDragStart}
-      className="bg-white p-3 rounded-md shadow-sm border border-gray-200 cursor-grab active:cursor-grabbing mb-3"
+      className="bg-white p-4 rounded-2xl shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-100 cursor-grab active:cursor-grabbing mb-3 group transition-all hover:shadow-[0_8px_25px_rgba(0,0,0,0.04)] hover:border-primary/20"
     >
-      <div className="flex justify-between items-start">
-        <span className="font-semibold text-sm text-gray-800">{deal.name}</span>
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex flex-col">
+          <span className="font-bold text-sm text-gray-900 leading-tight group-hover:text-primary transition-colors">{deal.name}</span>
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{deal.accountName}</span>
+        </div>
         <div className="relative">
           <button
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-300 hover:text-gray-900 transition-colors p-1"
             onClick={(e) => {
               e.stopPropagation();
               setShowActions(!showActions);
@@ -55,45 +58,56 @@ const DealCard: React.FC<{ deal: Deal; onSelectDeal: (deal: Deal) => void }> = (
 
           {showActions && (
             <div
-              className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
+              className="origin-top-right absolute right-0 mt-2 w-48 rounded-xl shadow-xl bg-white border border-gray-100 z-20 animate-fadeIn"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="py-1" role="menu">
+              <div className="py-1.5 p-1" role="menu">
                 <Link
                   to={`/deals/${deal.id}`}
-                  className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex items-center w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                   role="menuitem"
                 >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View
+                  <Eye className="w-3.5 h-3.5 mr-2 text-gray-400" />
+                  View Details
                 </Link>
                 <button
                   onClick={handleEditClick}
-                  className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex items-center w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                   role="menuitem"
                 >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit
+                  <Edit className="w-3.5 h-3.5 mr-2 text-gray-400" />
+                  Quick Edit
                 </button>
+                <div className="my-1 border-t border-gray-50"></div>
                 <button
                   onClick={handleDeleteClick}
-                  className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  className="flex items-center w-full text-left px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   role="menuitem"
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
+                  <Trash2 className="w-3.5 h-3.5 mr-2" />
+                  Remove Deal
                 </button>
               </div>
             </div>
           )}
         </div>
       </div>
-      <p className="text-xs text-gray-500">{deal.accountName}</p>
-      <p className="text-sm font-bold text-gray-700 my-2">
-        ${deal.value.toLocaleString()}
-      </p>
-      <div className="flex justify-end items-center text-xs">
-        {owner && <img src={owner.avatar} alt={owner.name} className="w-6 h-6 rounded-full" title={owner.name} />}
+
+      <div className="flex items-baseline gap-1 mt-auto">
+        <span className="text-[10px] font-bold text-primary opacity-50">$</span>
+        <span className="text-lg font-black text-gray-900 tracking-tight">
+          {deal.value.toLocaleString()}
+        </span>
+      </div>
+
+      <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-50">
+        <div className="flex items-center gap-1.5 grayscale group-hover:grayscale-0 transition-all opacity-60 group-hover:opacity-100">
+          {owner && <img src={owner.avatar} alt={owner.name} className="w-5 h-5 rounded-full ring-2 ring-white ring-offset-1 border border-gray-100" title={owner.name} />}
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{owner?.name.split(' ')[0]}</span>
+        </div>
+        <div className="w-6 h-6 rounded-lg bg-gray-50 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+          <ChevronRight size={12} className="text-gray-300 group-hover:text-primary transition-colors" />
+        </div>
       </div>
     </div>
   );
@@ -123,30 +137,31 @@ const DealColumn: React.FC<{ stage: DealStage; deals: Deal[]; onSelectDeal: (dea
 
   return (
     <div
-      className={`w-72 bg-gray-50 rounded-lg p-1 flex-shrink-0 h-full flex flex-col transition-colors ${isDragOver ? 'bg-blue-100' : ''}`}
+      className={`w-[320px] bg-[#F8FAFC]/50 rounded-[32px] p-2 flex-shrink-0 h-full flex flex-col transition-all border border-transparent ${isDragOver ? 'bg-primary/5 border-primary/20 border-dashed' : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="flex justify-between items-center p-3">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase flex items-center">
-          <GripVertical size={16} className="text-gray-400 mr-1" />
-          {stage} <span className="text-gray-400 ml-2">{deals.length}</span>
-        </h2>
-        <span className="text-sm font-bold text-gray-600">${totalValue.toLocaleString()}</span>
+      <div className="flex justify-between items-center p-4">
+        <div className="flex flex-col">
+          <h2 className="text-[11px] font-black text-gray-900 uppercase tracking-[0.2em] flex items-center mb-0.5">
+            {stage}
+          </h2>
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{deals.length} active deals</span>
+        </div>
+        <div className="px-3 py-1 bg-white border border-gray-100 rounded-full shadow-sm">
+          <span className="text-xs font-black text-gray-900 tracking-tight">${totalValue.toLocaleString()}</span>
+        </div>
       </div>
-      <div className="overflow-y-auto px-2 flex-1">
+      <div className="overflow-y-auto px-2 flex-1 scrollbar-hide">
         {deals.map(deal => <DealCard key={deal.id} deal={deal} onSelectDeal={onSelectDeal} />)}
-        <div className="mb-2">
-          <Button
-            variant="outline"
-            size="sm"
-            icon={Plus}
-            className="w-full"
+        <div className="mt-2 mb-4">
+          <button
             onClick={() => onCreateDeal(stage)}
+            className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:border-primary/20 hover:text-primary hover:bg-white transition-all group active:scale-[0.98]"
           >
-            Add Deal
-          </Button>
+            + Add Opportunity
+          </button>
         </div>
       </div>
     </div>
@@ -156,7 +171,7 @@ const DealColumn: React.FC<{ stage: DealStage; deals: Deal[]; onSelectDeal: (dea
 const DealsPage: React.FC = () => {
   const { deals } = useDeals();
   const { users } = useUsers();
-  const { isEditDealModalOpen, isCreateDealModalOpen, openCreateDealModal, closeCreateDealModal } = useUI();
+  const { isEditDealModalOpen, isCreateDealModalOpen, openCreateLeadModal, openCreateDealModal, closeCreateDealModal } = useUI();
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [newDealStage, setNewDealStage] = useState<DealStage | null>(null);
 
@@ -171,24 +186,22 @@ const DealsPage: React.FC = () => {
     return grouped;
   }, [deals]);
 
-  // Function to handle deal selection for editing
   const handleSelectDeal = (deal: Deal) => {
     setSelectedDeal(deal);
   };
 
-  // Function to handle creating a new deal
   const handleCreateDeal = (stage: DealStage) => {
     setNewDealStage(stage);
     openCreateDealModal();
   };
 
   return (
-    <div className="space-y-6 flex flex-col h-full">
+    <div className="space-y-6 flex flex-col h-full animate-fadeIn">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Deals</h1>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Sales Pipeline</h1>
         </div>
-        <div>
+        <div className="flex items-center gap-3">
           <Button
             variant="primary"
             size="md"
@@ -197,14 +210,14 @@ const DealsPage: React.FC = () => {
               setNewDealStage('Prospecting');
               openCreateDealModal();
             }}
-            className="bg-primary hover:bg-primary-dark text-white shadow-sm"
+            className="bg-gray-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-gray-200"
           >
             Create Deal
           </Button>
         </div>
       </div>
-      <div className="flex-1 overflow-hidden">
-        <div className="flex space-x-4 overflow-x-auto pb-4 h-full">
+      <div className="flex-1 overflow-hidden min-h-[600px]">
+        <div className="flex space-x-6 overflow-x-auto pb-8 h-full scrollbar-hide">
           {DEAL_STAGES.map(stage => (
             <DealColumn
               key={stage}
