@@ -6,6 +6,7 @@ interface ContactsContextType {
   contacts: Contact[];
   addContact: (contactData: Omit<Contact, 'id' | 'tags' | 'source' | 'customFields' | 'createdAt' | 'updatedAt' | 'normalizedPhone'>) => void;
   editContact: (contactId: string, contactData: Partial<Contact>) => void;
+  deleteContact: (contactId: string) => void;
 }
 
 const ContactsContext = createContext<ContactsContextType | undefined>(undefined);
@@ -29,15 +30,19 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   const editContact = (contactId: string, contactData: Partial<Contact>) => {
-    setContacts(prevContacts => 
-      prevContacts.map(contact => 
+    setContacts(prevContacts =>
+      prevContacts.map(contact =>
         contact.id === contactId ? { ...contact, ...contactData, updatedAt: new Date().toISOString() } : contact
       )
     );
   };
 
+  const deleteContact = (contactId: string) => {
+    setContacts(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
+  };
+
   return (
-    <ContactsContext.Provider value={{ contacts, addContact, editContact }}>
+    <ContactsContext.Provider value={{ contacts, addContact, editContact, deleteContact }}>
       {children}
     </ContactsContext.Provider>
   );

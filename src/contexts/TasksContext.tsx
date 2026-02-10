@@ -19,6 +19,7 @@ interface TasksContextType {
   addTask: (taskData: NewTaskData & { assignedToId?: string }) => void;
   editTask: (taskId: string, taskData: Partial<Task>) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
+  deleteTask: (taskId: string) => void;
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -29,36 +30,40 @@ export const TasksProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const addTask = (taskData: NewTaskData & { assignedToId?: string }) => {
     const currentUser = MOCK_USERS.user_1; // Default user if none assigned
     const newTask: Task = {
-        id: `task_${Date.now()}`,
-        title: taskData.title,
-        description: taskData.description,
-        status: 'Pending',
-        priority: taskData.priority,
-        dueDate: taskData.dueDate,
-        assignedToId: taskData.assignedToId || currentUser.id,
-        relatedTo: taskData.relatedTo,
+      id: `task_${Date.now()}`,
+      title: taskData.title,
+      description: taskData.description,
+      status: 'Pending',
+      priority: taskData.priority,
+      dueDate: taskData.dueDate,
+      assignedToId: taskData.assignedToId || currentUser.id,
+      relatedTo: taskData.relatedTo,
     };
     setTasks(prevTasks => [newTask, ...prevTasks]);
   };
 
   const editTask = (taskId: string, taskData: Partial<Task>) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
         task.id === taskId ? { ...task, ...taskData, updatedAt: new Date().toISOString() } : task
       )
     );
   };
 
   const updateTaskStatus = (taskId: string, status: TaskStatus) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
         task.id === taskId ? { ...task, status, updatedAt: new Date().toISOString() } : task
       )
     );
   };
 
+  const deleteTask = (taskId: string) => {
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+  };
+
   return (
-    <TasksContext.Provider value={{ tasks, addTask, editTask, updateTaskStatus }}>
+    <TasksContext.Provider value={{ tasks, addTask, editTask, updateTaskStatus, deleteTask }}>
       {children}
     </TasksContext.Provider>
   );

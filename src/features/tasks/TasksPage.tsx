@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, CheckSquare, ArrowUp, ArrowDown, Minus, ChevronsUpDown, ChevronUp, ChevronDown, Edit3, Calendar, User as UserIcon, MoreHorizontal } from 'lucide-react';
+import { Plus, CheckSquare, ArrowUp, ArrowDown, Minus, ChevronsUpDown, ChevronUp, ChevronDown, Edit3, Calendar, User as UserIcon, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useTasks } from '../../contexts/TasksContext';
 import { useUsers } from '../../contexts/UsersContext';
 import { useUI } from '../../contexts/UIContext';
@@ -20,7 +20,7 @@ const priorityStyles: Record<TaskPriority, { color: string; icon: React.ElementT
 };
 
 const TasksPage: React.FC = () => {
-  const { tasks } = useTasks();
+  const { tasks, deleteTask } = useTasks();
   const { users } = useUsers();
   const { openCreateTaskModal, openEditTaskModal } = useUI();
   const [statusFilter, setStatusFilter] = useState<TaskStatus | 'All'>('All');
@@ -64,6 +64,12 @@ const TasksPage: React.FC = () => {
   const handleEditTask = (task: Task) => {
     setSelectedTask(task);
     openEditTaskModal();
+  };
+
+  const handleDeleteTask = (taskId: string, title: string) => {
+    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
+      deleteTask(taskId);
+    }
   };
 
   const taskStatuses: (TaskStatus | 'All')[] = ['All', 'Pending', 'In Progress', 'Completed'];
@@ -143,12 +149,22 @@ const TasksPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-8 py-5 whitespace-nowrap text-right">
-                        <button
-                          onClick={() => handleEditTask(task)}
-                          className="p-2 text-gray-300 hover:text-gray-900 hover:bg-white rounded-xl transition-all active:scale-95"
-                        >
-                          <Plus className="w-5 h-5 rotate-45 group-hover:text-primary transition-colors" />
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleEditTask(task)}
+                            className="p-2 text-gray-300 hover:text-gray-900 hover:bg-white rounded-xl transition-all active:scale-95"
+                            title="Edit"
+                          >
+                            <Plus className="w-5 h-5 rotate-45 group-hover:text-primary transition-colors" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTask(task.id, task.title)}
+                            className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-95"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Sparkles, PlayCircle, Search, Plus, ChevronsUpDown, ChevronDown, ChevronLeft, ChevronRight, Info, ChevronUp, MoreHorizontal, Edit, Upload } from 'lucide-react';
+import { Sparkles, PlayCircle, Search, Plus, ChevronsUpDown, ChevronDown, ChevronLeft, ChevronRight, Info, ChevronUp, MoreHorizontal, Edit, Upload, Trash2 } from 'lucide-react';
 import { useContacts } from '../../contexts/ContactsContext';
 import { useUI } from '../../contexts/UIContext';
 import type { Contact } from '../../types';
@@ -11,7 +11,8 @@ const ContactsTable: React.FC<{
     requestSort: (key: keyof Contact) => void;
     sortConfig: { key: keyof Contact; direction: 'ascending' | 'descending' } | null;
     onSelectContact: (contact: Contact) => void;
-}> = ({ contacts, requestSort, sortConfig, onSelectContact }) => {
+    onDeleteContact: (contactId: string, name: string) => void;
+}> = ({ contacts, requestSort, sortConfig, onSelectContact, onDeleteContact }) => {
     const getSortIcon = (key: keyof Contact) => {
         if (!sortConfig || sortConfig.key !== key) {
             return <ChevronsUpDown className="w-4 h-4 ml-1 opacity-40 transition-transform duration-200" />;
@@ -78,7 +79,7 @@ const ContactsTable: React.FC<{
                                 </span>
                             </button>
                         </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Actions
                         </th>
                     </tr>
@@ -142,6 +143,17 @@ const ContactsTable: React.FC<{
                                                     <Edit className="w-4 h-4 mr-2" />
                                                     Edit
                                                 </button>
+                                                <button
+                                                    onClick={() => {
+                                                        onDeleteContact(contact.id, contact.name || 'this contact');
+                                                        setShowActions(null);
+                                                    }}
+                                                    className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                                                    role="menuitem"
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Delete
+                                                </button>
                                             </div>
                                         </div>
                                     )}
@@ -157,10 +169,8 @@ const ContactsTable: React.FC<{
 
 import { useNavigate } from 'react-router-dom';
 
-// ... other imports
-
 const ContactsPage: React.FC = () => {
-    const { contacts } = useContacts();
+    const { contacts, deleteContact } = useContacts();
     const { openCreateContactModal, openEditContactModal, isEditContactModalOpen } = useUI();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
@@ -180,7 +190,6 @@ const ContactsPage: React.FC = () => {
         let sortableItems = [...filteredContacts];
         if (sortConfig !== null) {
             sortableItems.sort((a, b) => {
-                // Handle potential undefined values for name
                 if (sortConfig.key === 'name') {
                     const aName = a.name || '';
                     const bName = b.name || '';
@@ -215,10 +224,15 @@ const ContactsPage: React.FC = () => {
         setSortConfig({ key, direction });
     };
 
-    // Function to handle contact selection for editing
     const handleSelectContact = (contact: Contact) => {
         setSelectedContact(contact);
         openEditContactModal();
+    };
+
+    const handleDeleteContact = (contactId: string, name: string) => {
+        if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+            deleteContact(contactId);
+        }
     };
 
     return (
@@ -226,33 +240,33 @@ const ContactsPage: React.FC = () => {
             {/* Header Toolbar */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
+                    <h1 className="text-2xl font-black text-gray-900 tracking-tight">Contacts <span className="text-primary/50 text-sm font-bold ml-1">{contacts.length}</span></h1>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                    <div className="relative flex-grow sm:flex-grow-0">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <div className="relative flex-grow sm:flex-grow-0 group">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors" />
                         <input
                             type="text"
                             placeholder="Search contacts..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9 pr-3 py-2 w-full sm:w-64 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                            className="pl-9 pr-3 py-2.5 w-full sm:w-64 bg-white border border-gray-100 rounded-xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all placeholder:text-gray-300"
                         />
                     </div>
                     <div className="flex gap-2">
                         <Button
                             variant="outline"
                             size="md"
-                            className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                            className="text-gray-600 border-gray-100 bg-white hover:bg-gray-50 rounded-xl font-bold text-xs uppercase tracking-widest"
                         >
                             Broadcast
                         </Button>
                         <Button
                             variant="outline"
                             size="md"
-                            icon={Upload} // Changed icon
+                            icon={Upload}
                             onClick={() => navigate('/campaigns/import')}
-                            className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                            className="text-gray-600 border-gray-100 bg-white hover:bg-gray-50 rounded-xl font-bold text-xs uppercase tracking-widest"
                         >
                             Import
                         </Button>
@@ -261,7 +275,7 @@ const ContactsPage: React.FC = () => {
                             size="md"
                             icon={Plus}
                             onClick={openCreateContactModal}
-                            className="bg-primary hover:bg-primary-dark text-white shadow-sm"
+                            className="bg-gray-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-gray-200"
                         >
                             Add Contact
                         </Button>
@@ -270,40 +284,33 @@ const ContactsPage: React.FC = () => {
             </div>
 
             {/* Contacts List */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
-
+            <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/80 transition-all duration-300 hover:shadow-md overflow-hidden">
                 <div className="transition-all duration-500 ease-in-out">
-                    <ContactsTable contacts={sortedContacts} requestSort={requestSort} sortConfig={sortConfig} onSelectContact={handleSelectContact} />
+                    <ContactsTable
+                        contacts={sortedContacts}
+                        requestSort={requestSort}
+                        sortConfig={sortConfig}
+                        onSelectContact={handleSelectContact}
+                        onDeleteContact={handleDeleteContact}
+                    />
                 </div>
 
-                <div className="p-4 border-t flex items-center justify-end text-sm text-text-light space-x-4">
-                    <span>1 - {sortedContacts.length} of {sortedContacts.length}</span>
+                <div className="p-6 bg-gray-50/30 border-t border-gray-50 flex items-center justify-end text-[10px] font-black uppercase tracking-widest text-gray-400 space-x-4">
+                    <span>{sortedContacts.length} total records</span>
                     <div className="flex items-center space-x-1">
-                        <select className="border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring-primary text-sm p-1 transition-all duration-200">
+                        <select className="bg-white border-gray-200 rounded-lg shadow-sm text-[10px] font-black p-1.5 focus:border-primary focus:ring-primary transition-all duration-200">
                             <option>25 per page</option>
                             <option>50 per page</option>
                             <option>100 per page</option>
                         </select>
                     </div>
-                    <div className="flex items-center">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            icon={ChevronLeft}
-                            disabled={sortedContacts.length <= 25}
-                            aria-label="Previous page"
-                            className="p-2 transition-all duration-200 transform hover:scale-110"
-                        />
-
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            icon={ChevronRight}
-                            disabled={sortedContacts.length <= 25}
-                            aria-label="Next page"
-                            className="p-2 transition-all duration-200 transform hover:scale-110"
-                        />
-
+                    <div className="flex items-center gap-1">
+                        <button className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-300 hover:text-gray-900 disabled:opacity-30" disabled>
+                            <ChevronLeft size={14} />
+                        </button>
+                        <button className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-300 hover:text-gray-900 disabled:opacity-30" disabled>
+                            <ChevronRight size={14} />
+                        </button>
                     </div>
                 </div>
             </div>
