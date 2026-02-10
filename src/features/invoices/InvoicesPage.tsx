@@ -165,7 +165,7 @@ const InvoicesPage: React.FC = () => {
             variant="primary"
             size="md"
             icon={Plus}
-            onClick={() => navigate('/invoices/create')}
+            onClick={() => navigate('/invoices/new')}
             className="bg-primary hover:bg-primary-dark text-white shadow-sm"
           >
             Create Invoice
@@ -206,7 +206,7 @@ const InvoicesPage: React.FC = () => {
             onClick={exportInvoicesAsCSV}
             className="text-gray-600 hover:text-gray-800"
           >
-            Export CVS
+            Export CSV
           </Button>
         </div>
       </div>

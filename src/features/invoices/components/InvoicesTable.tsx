@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { Invoice, InvoiceStatus } from '../../../types';
 import { ChevronsUpDown, ChevronUp, ChevronDown, Download, Edit, MoreVertical, Check, Send, Trash2 } from 'lucide-react';
 import { getInvoiceStatusMeta } from '../constants';
@@ -19,6 +19,7 @@ const InvoiceRow: React.FC<{
   onUpdateStatus?: (id: string, status: InvoiceStatus) => void;
   onDelete?: (id: string) => void;
 }> = ({ invoice, onUpdateStatus, onDelete }) => {
+  const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -142,7 +143,7 @@ const InvoiceRow: React.FC<{
           <button
             onClick={(e) => {
               e.stopPropagation();
-              alert(`Edit invoice ${invoice.invoiceNumber}`);
+              navigate(`/invoices/${invoice.id}/edit`);
             }}
             className="text-gray-400 hover:text-[#0079C1] p-1.5 rounded-md hover:bg-blue-50 transition-colors"
             title="Edit"
