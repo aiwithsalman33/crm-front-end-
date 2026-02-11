@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Camera, Upload } from 'lucide-react';
 import { useTeam, TeamMember, TeamMemberRole, TeamMemberStatus } from '../../../contexts/TeamContext';
 
 interface EditTeamMemberModalProps {
@@ -38,6 +38,17 @@ const EditTeamMemberModal: React.FC<EditTeamMemberModalProps> = ({ isOpen, onClo
             }
         }
     }, [memberId, isOpen, getTeamMemberById]);
+
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData((prev) => ({ ...prev, avatar: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,6 +115,37 @@ const EditTeamMemberModal: React.FC<EditTeamMemberModalProps> = ({ isOpen, onClo
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    {/* Profile Photo */}
+                    <div className="flex flex-col items-center justify-center space-y-3 pb-2">
+                        <div className="relative group">
+                            <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-100 shadow-md">
+                                {formData.avatar ? (
+                                    <img
+                                        src={formData.avatar}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                        <Camera className="w-8 h-8 text-gray-400" />
+                                    </div>
+                                )}
+                            </div>
+                            <label className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full shadow-lg cursor-pointer hover:bg-primary-dark transition-all duration-200 transform hover:scale-110 group-hover:rotate-12">
+                                <Camera className="w-4 h-4" />
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handlePhotoChange}
+                                />
+                            </label>
+                        </div>
+                        <p className="text-xs text-gray-500 font-medium tracking-wide">
+                            Click camera to change profile photo
+                        </p>
+                    </div>
+
                     {/* Basic Info */}
                     <div className="space-y-4">
                         <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
